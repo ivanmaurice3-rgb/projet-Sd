@@ -1,0 +1,57 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Memento Version Tracker</title>
+    <link rel="stylesheet" href="style.css">
+</head>
+
+<body>
+
+    </header>
+    <h1>Version Tracker</h1>
+    <p>Suivi des versions des services Memento</p>
+    </header>
+
+    <main>
+         <section class="summary">
+      <div class="card">
+        <strong id="total-services">0</strong>
+        <span>Services</span>
+             </div>
+
+      <div class="card">
+        <strong id="services-to-deploy">0</strong>
+        <span>À déployer</span>
+      </div>
+
+      <div class="card">
+        <strong id="services-up-to-date">0</strong>
+        <span>À jour</span>
+      </div>
+     </section>
+
+    <section>
+      <h2>Services</h2>
+
+      <table>
+        <thead>
+          <tr>
+            <th>Service</th>
+            <th>Version en production</th>
+            <th>Dernière version</th>
+            <th>Statut</th>
+          </tr>
+        </thead>
+
+         <tbody id="services-table">
+        </tbody>
+      </table>
+
+ <script src="data.js"></script>
+    <script src="script.js"></script>
+    
+    
+</body>
+</html>
