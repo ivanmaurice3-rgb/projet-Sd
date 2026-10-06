@@ -1,57 +1,82 @@
 <!DOCTYPE html>
-<html lang="en">
+<html lang="fr">
+
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Memento Version Tracker</title>
+
+    <title>Memento - Version Tracker</title>
+
     <link rel="stylesheet" href="style.css">
 </head>
 
 <body>
 
-    </header>
-    <h1>Version Tracker</h1>
-    <p>Suivi des versions des services Memento</p>
-    </header>
+    <div class="container">
 
-    <main>
-         <section class="summary">
-      <div class="card">
-        <strong id="total-services">0</strong>
-        <span>Services</span>
-             </div>
+        <header>
+            <h1>Tracking des versions</h1>
+            <p>
+                Suivi des versions des services et identification des services
+                nécessitant une mise à jour.
+            </p>
+        </header>
 
-      <div class="card">
-        <strong id="services-to-deploy">0</strong>
-        <span>À déployer</span>
-      </div>
+        <section class="counters">
 
-      <div class="card">
-        <strong id="services-up-to-date">0</strong>
-        <span>À jour</span>
-      </div>
-     </section>
+            <button class="counter active" data-filter="all">
+                <span id="count-all">0</span>
+                <strong>Total</strong>
+            </button>
 
-    <section>
-      <h2>Services</h2>
+            <button class="counter deploy-counter" data-filter="deploy">
+                <span id="count-deploy">0</span>
+                <strong>À déployer</strong>
+            </button>
 
-      <table>
-        <thead>
-          <tr>
-            <th>Service</th>
-            <th>Version en production</th>
-            <th>Dernière version</th>
-            <th>Statut</th>
-          </tr>
-        </thead>
+            <button class="counter update-counter" data-filter="up-to-date">
+                <span id="count-up-to-date">0</span>
+                <strong>À jour</strong>
+            </button>
 
-         <tbody id="services-table">
-        </tbody>
-      </table>
+        </section>
 
- <script src="data.js"></script>
+        <section id="services-view">
+
+            <h2>Services</h2>
+
+            <table>
+                <thead>
+                    <tr>
+                        <th>Service</th>
+                        <th>Version en production</th>
+                        <th>Dernière version disponible</th>
+                        <th>Statut</th>
+                    </tr>
+                </thead>
+
+                <tbody id="services-table">
+                </tbody>
+            </table>
+
+        </section>
+
+        <section id="detail-view" class="hidden">
+
+            <button id="back-button">
+                ← Retour aux services
+            </button>
+
+            <div id="service-detail">
+            </div>
+
+        </section>
+
+    </div>
+
+    <script src="data.js"></script>
     <script src="script.js"></script>
-    
-    
+
 </body>
+
 </html>
