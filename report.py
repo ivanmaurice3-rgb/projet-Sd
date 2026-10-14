@@ -1,43 +1,61 @@
+
+from github import Github, Auth
 import os
 import json
-from github import Github, Auth
 
-# Connexion à GitHub
 token = os.environ.get("GITHUB_TOKEN")
 
 if not token:
-    raise RuntimeError(
-        "La variable d'environnement GITHUB_TOKEN n'est pas définie."
-    )
+    raise RuntimeError("La variable GITHUB_TOKEN n'est pas définie.")
 
-auth = Auth.Token(token)
-github = Github(auth=auth)
+github = Github(auth=Auth.Token(token))
+
+# Liste des dépôts à récupérer
+repository_names = [
+    "orga-manager",
+    "user-manager",
+    "my-moments",
+    "media-manager",
+]
+
+services = []
 
 try:
-    # Repository à consulter
-    repo = github.get_repo("ivanmaurice3-rgb/projet-Sd")
+    for repository_name in repository_names:
+        try:
+            repo = github.get_repo(
+                f"ivanmaurice3-rgb/{repository_name}"
+            )
 
-    # Récupération des tags
-    tags = repo.get_tags()
-    git_tags = [tag.name for tag in tags]
+            git_tags = [tag.name for tag in repo.get_tags()]
 
-    # Création des données
-    data = [
-        {
-            "service_name": repo.name,
-            "git_tags": git_tags,
-            "current_release": git_tags[0] if git_tags else ""
-        }
-    ]
+            try:
+                release = repo.get_latest_release()
+                current_release = release.tag_name
+            except Exception:
+                current_release = git_tags[0] if git_tags else ""
 
-    # Transformation en JavaScript
-    data_js = "const services = " + json.dumps(data, indent=4) + ";"
+            services.append({
+                "service_name": repo.name,
+                "git_tags": git_tags,
+                "current_release": current_release
+            })
 
-    # Création ou remplacement de data.js
+            print(f"Service récupéré : {repo.name}")
+
+        except Exception as error:
+            print(f"Impossible de récupérer {repository_name} : {error}")
+
+    data_js = "const services = " + json.dumps(
+        services,
+        indent=4,
+        ensure_ascii=False
+    ) + ";"
+
     with open("data.js", "w", encoding="utf-8") as file:
         file.write(data_js)
 
-    print("data.js a été généré avec succès.")
+    print(f"{len(services)} service(s) enregistré(s) dans data.js.")
 
 finally:
     github.close()
