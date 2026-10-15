@@ -1,61 +1,50 @@
-
-from github import Github, Auth
-import os
 import json
 
-token = os.environ.get("GITHUB_TOKEN")
+# Conserver les quatre services de démonstration dans data.js.
+# Ce script ne contacte pas GitHub et ne nécessite aucun token.
 
-if not token:
-    raise RuntimeError("La variable GITHUB_TOKEN n'est pas définie.")
-
-github = Github(auth=Auth.Token(token))
-
-# Liste des dépôts à récupérer
-repository_names = [
-    "orga-manager",
-    "user-manager",
-    "my-moments",
-    "media-manager",
+services = [
+    {
+        "service_name": "orga-manager",
+        "git_tags": [
+            "v2.0.0", "v2.0.1", "v2.0.2", "v2.1.0",
+            "v2.2.0", "v2.3.0", "v2.3.1", "v2.3.2",
+            "v2.3.2-hf1", "v2.4.0", "v2.4.1"
+        ],
+        "current_release": "v2.4.0"
+    },
+    {
+        "service_name": "user-manager",
+        "git_tags": [
+            "v2.0.0", "v2.1.0", "v2.1.1", "v2.2.0"
+        ],
+        "current_release": "v2.1.0-hf1"
+    },
+    {
+        "service_name": "my-moments",
+        "git_tags": [
+            "v2.0.0", "v2.1.0", "v2.1.1", "v2.2.0",
+            "v3.0.0", "v3.1.0", "test-simon"
+        ],
+        "current_release": "v3.0.0"
+    },
+    {
+        "service_name": "media-manager",
+        "git_tags": [
+            "v2.0.0", "v2.1.0", "v2.1.1"
+        ],
+        "current_release": "v2.1.1"
+    }
 ]
 
-services = []
+data_js = "const services = " + json.dumps(
+    services,
+    indent=2,
+    ensure_ascii=False
+) + ";"
 
-try:
-    for repository_name in repository_names:
-        try:
-            repo = github.get_repo(
-                f"ivanmaurice3-rgb/{repository_name}"
-            )
+with open("data.js", "w", encoding="utf-8") as file:
+    file.write(data_js)
 
-            git_tags = [tag.name for tag in repo.get_tags()]
-
-            try:
-                release = repo.get_latest_release()
-                current_release = release.tag_name
-            except Exception:
-                current_release = git_tags[0] if git_tags else ""
-
-            services.append({
-                "service_name": repo.name,
-                "git_tags": git_tags,
-                "current_release": current_release
-            })
-
-            print(f"Service récupéré : {repo.name}")
-
-        except Exception as error:
-            print(f"Impossible de récupérer {repository_name} : {error}")
-
-    data_js = "const services = " + json.dumps(
-        services,
-        indent=4,
-        ensure_ascii=False
-    ) + ";"
-
-    with open("data.js", "w", encoding="utf-8") as file:
-        file.write(data_js)
-
-    print(f"{len(services)} service(s) enregistré(s) dans data.js.")
-
-finally:
-    github.close()
+print("data.js a été généré avec succès.")
+print(f"{len(services)} services enregistrés.")
