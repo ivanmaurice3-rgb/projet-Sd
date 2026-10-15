@@ -1,50 +1,62 @@
+import os
 import json
+from github import Github, Auth
 
-# Conserver les quatre services de démonstration dans data.js.
-# Ce script ne contacte pas GitHub et ne nécessite aucun token.
+# 1. Lire le token GitHub
+token = os.environ.get("GITHUB_TOKEN")
 
-services = [
-    {
-        "service_name": "orga-manager",
-        "git_tags": [
-            "v2.0.0", "v2.0.1", "v2.0.2", "v2.1.0",
-            "v2.2.0", "v2.3.0", "v2.3.1", "v2.3.2",
-            "v2.3.2-hf1", "v2.4.0", "v2.4.1"
-        ],
-        "current_release": "v2.4.0"
-    },
-    {
-        "service_name": "user-manager",
-        "git_tags": [
-            "v2.0.0", "v2.1.0", "v2.1.1", "v2.2.0"
-        ],
-        "current_release": "v2.1.0-hf1"
-    },
-    {
-        "service_name": "my-moments",
-        "git_tags": [
-            "v2.0.0", "v2.1.0", "v2.1.1", "v2.2.0",
-            "v3.0.0", "v3.1.0", "test-simon"
-        ],
-        "current_release": "v3.0.0"
-    },
-    {
-        "service_name": "media-manager",
-        "git_tags": [
-            "v2.0.0", "v2.1.0", "v2.1.1"
-        ],
-        "current_release": "v2.1.1"
-    }
-]
+if not token:
+    raise RuntimeError(
+        "GITHUB_TOKEN n'est pas défini. "
+        "Définis ton token dans PowerShell avant de lancer le script."
+    )
 
-data_js = "const services = " + json.dumps(
-    services,
-    indent=2,
-    ensure_ascii=False
-) + ";"
+# 2. Se connecter à GitHub
+github = Github(auth=Auth.Token(token))
+services = []
 
-with open("data.js", "w", encoding="utf-8") as file:
-    file.write(data_js)
+try:
+    # 3. Identifier le compte connecté
+    user = github.get_user()
+    print(f"Compte connecté : {user.login}")
 
-print("data.js a été généré avec succès.")
-print(f"{len(services)} services enregistrés.")
+    # 4. Récupérer les dépôts accessibles au compte
+    repositories = user.get_repos()
+
+    for repo in repositories:
+        print(f"\nDépôt trouvé : {repo.full_name}")
+
+        # 5. Récupérer les tags du dépôt
+        git_tags = [tag.name for tag in repo.get_tags()]
+        print(f"Nombre de tags : {len(git_tags)}")
+
+        # 6. Récupérer la dernière release publiée, si disponible
+        try:
+            release = repo.get_latest_release()
+            current_release = release.tag_name
+        except Exception:
+            current_release = ""
+
+        # 7. Ajouter le dépôt aux données
+        services.append({
+            "service_name": repo.name,
+            "git_tags": git_tags,
+            "current_release": current_release
+        })
+
+    # 8. Générer le fichier data.js
+    data_js = "const services = " + json.dumps(
+        services,
+        indent=2,
+        ensure_ascii=False
+    ) + ";"
+
+    with open("data.js", "w", encoding="utf-8") as file:
+        file.write(data_js)
+
+    print(f"\nTerminé : {len(services)} dépôt(s) récupéré(s).")
+    print("Le fichier data.js a été généré.")
+
+finally:
+    github.close()
+
